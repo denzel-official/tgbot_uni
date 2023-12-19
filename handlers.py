@@ -1,13 +1,19 @@
 from aiogram import F, Router, types
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram.types import FSInputFile, URLInputFile, BufferedInputFile
 from aiogram import flags
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import *
 
 import kb
 import text
 import config
+
+
+class Form(StatesGroup):
+    choosing_good = State()
+
 
 router = Router()
 lp = types.LabeledPrice(label='rup', amount=100000)
@@ -20,13 +26,23 @@ async def start_handler(msg: Message):
 
 
 @router.message(Command("exchange"))
-async def start_handler(msg: Message):
-    await msg.answer(text.greet.format(name=msg.from_user.full_name))
+async def start_handler(msg: Message, state: FSMContext):
+    await msg.answer('Напишите что вас интересует')
+    await state.set_state(Form.choosing_good)
 
 
 @router.message(Command("upload"))
 async def start_handler(msg: Message):
     await msg.answer(text.greet.format(name=msg.from_user.full_name))
+
+
+@router.message(F.text, Form.choosing_good)
+async def cmd_buy(msg: Message):
+    #здесь нужно присвоить некоторый элемент бд, который соответствует поиску, переменной
+    #поиск это message.text
+    #дальше
+    await msg.answer_photo(FSInputFile('Cat.jpg'), caption='Описание товара\nВладелец: @Baba3Yaga')
+
 # @router.message(F.text == "Меню")
 # @router.message(Command("menu"))
 # @router.message(F.text == "Выйти в меню")
