@@ -11,8 +11,12 @@ import text
 import config
 
 
-class Form(StatesGroup):
+class Choose(StatesGroup):
     choosing_good = State()
+
+
+class Upload(StatesGroup):
+    uploading_good = State()
 
 
 router = Router()
@@ -28,17 +32,18 @@ async def start_handler(msg: Message):
 @router.message(Command("exchange"))
 async def start_handler(msg: Message, state: FSMContext):
     await msg.answer('Напишите что вас интересует')
-    await state.set_state(Form.choosing_good)
+    await state.set_state(Choose.choosing_good)
 
 
 @router.message(Command("upload"))
-async def start_handler(msg: Message):
+async def start_handler(msg: Message, state: FSMContext):
     await msg.answer(text.greet.format(name=msg.from_user.full_name))
 
 
-@router.message(F.text, Form.choosing_good)
-async def cmd_buy(msg: Message):
+@router.message(F.text, Choose.choosing_good)
+async def cmd_buy(msg: Message, state: FSMContext):
     # здесь нужно присвоить некоторый элемент бд, который соответствует поиску, переменной
     # поиск это message.text
     # дальше
     await msg.answer_photo(FSInputFile('Cat.jpg'), caption='Описание товара\nВладелец: @Baba3Yaga')
+    await state.clear()
